@@ -1,0 +1,8 @@
+[package]
+name = "todo-wasm"
+version = "0.1.0"
+authors = ["tkr <kgtkr.jp@gmail.com>"]
+
+[dependencies]
+yew = "0.3.0"
+stdweb = "0.4.6"
