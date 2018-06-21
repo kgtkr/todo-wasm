@@ -5,30 +5,49 @@ use yew::prelude::*;
 type Context = ();
 
 struct Model {
-    click: bool,
+    todos: Vec<(i32, String, bool)>,
+    filter: bool,
+    form: String,
+    next_id: i32,
 }
 
 enum Msg {
-    DoIt,
+    Add(String),
+    Remove(i32),
+    SwitchFilter,
+    ChangeForm(String),
 }
 
 impl Component<Context> for Model {
-    // Some details omitted. Explore the examples to get more.
-
     type Msg = Msg;
     type Properties = ();
 
     fn create(_: Self::Properties, _: &mut Env<Context, Self>) -> Self {
-        Model { click: false }
+        Model {
+            todos: Vec::new(),
+            filter: false,
+            form: "".to_string(),
+            next_id: 0,
+        }
     }
 
     fn update(&mut self, msg: Self::Msg, _: &mut Env<Context, Self>) -> ShouldRender {
         match msg {
-            Msg::DoIt => {
-                self.click = true;
-                true
+            Msg::Add(name) => {
+                self.todos.push((self.next_id, name, false));
+                self.next_id += 1;
+            }
+            Msg::Remove(id) => {
+                self.todos = self.todos.into_iter().filter(|(x, ..)| *x != id).collect();
+            }
+            Msg::SwitchFilter => {
+                self.filter = !self.filter;
+            }
+            Msg::ChangeForm(text) => {
+                self.form = text;
             }
         }
+        true
     }
 }
 
