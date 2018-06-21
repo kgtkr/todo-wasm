@@ -1,7 +1,11 @@
+#![feature(drain_filter)]
+#![feature(nll)]
+
 #[macro_use]
 extern crate yew;
 use yew::prelude::*;
-
+#[macro_use]
+extern crate stdweb;
 type Context = ();
 
 struct Model {
@@ -12,7 +16,7 @@ struct Model {
 }
 
 enum Msg {
-    Add(String),
+    Add,
     Remove(i32),
     SwitchFilter,
     ChangeForm(String),
@@ -33,12 +37,13 @@ impl Component<Context> for Model {
 
     fn update(&mut self, msg: Self::Msg, _: &mut Env<Context, Self>) -> ShouldRender {
         match msg {
-            Msg::Add(name) => {
-                self.todos.push((self.next_id, name, false));
+            Msg::Add => {
+                self.todos.push((self.next_id, self.form.clone(), false));
+                self.form = "".to_string();
                 self.next_id += 1;
             }
             Msg::Remove(id) => {
-                self.todos = self.todos.into_iter().filter(|(x, ..)| *x != id).collect();
+                self.todos.drain_filter(|(x, ..)| *x == id);
             }
             Msg::SwitchFilter => {
                 self.filter = !self.filter;
@@ -51,16 +56,24 @@ impl Component<Context> for Model {
     }
 }
 
+fn todo((id, name, _): &(i32, String, bool)) -> Html<Context, Model> {
+    let id = *id;
+    html!{
+        <li><button onclick=move|_| Msg::Remove(id), >{"削除"}</button>{name}</li>
+    }
+}
+
 impl Renderable<Context, Model> for Model {
     fn view(&self) -> Html<Context, Self> {
         html! {
             <>
-                <button onclick=|_| Msg::DoIt,>{ "Click me!" }</button>
-                {if self.click{
-                    "サンキュークリック"
-                }else{
-                    "クリックしてね"
-                }}
+                <div>
+                    <input value=&self.form, oninput=|e:yew::html::InputData|Msg::ChangeForm(e.value),/>
+                    <button onclick=|_| Msg::Add, >{"追加"}</button>
+                </div>
+                <ul>
+                    {for self.todos.iter().map(todo)}
+                </ul>
             </>
         }
     }
