@@ -20,6 +20,7 @@ enum Msg {
     Remove(i32),
     SwitchFilter,
     ChangeForm(String),
+    Completion(i32),
 }
 
 impl Component<Context> for Model {
@@ -51,15 +52,24 @@ impl Component<Context> for Model {
             Msg::ChangeForm(text) => {
                 self.form = text;
             }
+            Msg::Completion(id) => {
+                for x in &mut self.todos {
+                    if x.0 == id {
+                        x.2 = !x.2;
+                        break;
+                    }
+                }
+            }
         }
         true
     }
 }
 
-fn todo((id, name, _): &(i32, String, bool)) -> Html<Context, Model> {
+fn todo((id, name, completion): &(i32, String, bool)) -> Html<Context, Model> {
     let id = *id;
+    let completion = *completion;
     html!{
-        <li><button onclick=move|_| Msg::Remove(id), >{"削除"}</button>{name}</li>
+        <li><button onclick=move|_| Msg::Completion(id), >{if completion {"完了"}else {"未完了"}}</button><button onclick=move|_| Msg::Remove(id), >{"削除"}</button>{name}</li>
     }
 }
 
