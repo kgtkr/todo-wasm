@@ -1,0 +1,3 @@
+#!/bin/sh
+cargo web deploy
+gh-pages -d target/deploy
